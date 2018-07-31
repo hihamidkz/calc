@@ -1,0 +1,36 @@
+#!/bin/bash
+
+echo "Input process name:"
+read proc;
+echo "Input start date and time (FORMAT: DD.MM.YY HH:MM): "
+IFS='.' read -ra bdate;
+IFS=':' read -ra btime;
+echo "Input finish date and time (FORMAT: DD.MM.YY HH:MM): "
+IFS='.' read -ra edate;
+IFS=':' read -ra etime;
+
+months=([1]=Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+if [ -f /var/log/$proc.log ]
+then
+	month=${months[${bdate[1]}]};
+	reg="$month ${bdate[0]} ${btime[0]}:${btime[1]}";
+	bnum=$(grep -n "$reg" -m 1 /var/log/$proc.log | cut -d : -f 1);
+	while [[ -z $bnum ]]
+	do
+		btime[1]=$((${btime[1]} + 1));
+		reg="$month ${bdate[0]} ${btime[0]}:${btime[1]}";
+		bnum=$(grep -n "$reg" -m 1 /var/log/$proc.log | cut -d : -f 1);
+	done
+	month=${months[${edate[1]}]};
+	reg="$month ${edate[0]} ${etime[0]}:${etime[1]}";
+	enum=$(grep -n "$reg" -m 1 /var/log/$proc.log | cut -d : -f 1);
+	while [[ -z $enum ]]
+	do
+		[[ ${etime[1]} -eq 0 ]] && etime[0]=$((${etime[0]} - 1)) || etime[0]=${etime[0]};
+		[[ ${etime[1]} -eq 0 ]] && etime[1]=59 || etime[1]=$((${etime[1]} - 1));
+		reg="$month ${edate[0]} ${etime[0]}:${etime[1]}";
+		enum=$(grep -n "$reg" -m 1 /var/log/$proc.log | cut -d : -f 1);
+	done
+	cat /var/log/$proc.log | head -n $bnum | tail -n $enum;
+	#echo "$bnum $enum";
+fi
