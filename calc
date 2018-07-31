@@ -6,9 +6,24 @@ echo "Input masc:";
 IFS='.' read -ra m;
 
 echo -n "Network: ";
-for ((i = 0; i < 4; i++)) do
-	net[$i]=$((${ip[$i]} & ${m[$i]}));
+for ((i = 0; i < 3; i++)) do
+	echo -n "$((${ip[$i]} & ${m[$i]})).";
 done
-for i in ${net[@]}; do
-	echo -n "$i.";
+echo -n "$((${ip[3]} & ${m[3]}))";
+echo -ne "\nHostmin: ";
+for ((i = 0; i < 3; i++)) do
+	echo -n "$((${ip[$i]} & ${m[$i]})).";
 done
+echo -n "$(((${ip[$i]} & ${m[$i]}) + 1))";
+echo -ne "\nHostmax: ";
+for ((i = 0; i < 3; i++)) do
+	echo -n "$((${ip[$i]} | ~${m[$i]} & 255)).";
+done
+echo -n "$(((${ip[3]} | ~${m[3]} & 255) - 1))";
+echo -ne "\nBroadcast: ";
+for ((i = 0; i < 3; i++)) do
+	echo -n "$((${ip[$i]} | ~${m[$i]} & 255)).";
+done
+echo -n "$((${ip[3]} | ~${m[3]} & 255))";
+
+echo "";
