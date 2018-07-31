@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "Input IP-address:";
+IFS='.' read -ra ip;
+echo "Input masc:";
+IFS='.' read -ra m;
+
+echo -n "Network: ";
+for ((i = 0; i < 4; i++)) do
+	net[$i]=$((${ip[$i]} & ${m[$i]}));
+done
+for i in ${net[@]}; do
+	echo -n "$i.";
+done
